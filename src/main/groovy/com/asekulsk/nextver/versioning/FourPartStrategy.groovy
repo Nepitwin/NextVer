@@ -1,9 +1,9 @@
 package com.asekulsk.nextver.versioning
 
 import com.asekulsk.nextver.enumeration.VersionIncrementType
-import com.asekulsk.nextver.interfaces.VersioningStrategy
+import com.asekulsk.nextver.interfaces.IVersioningStrategy
 
-class FourPartStrategy implements VersioningStrategy {
+class FourPartStrategy implements IVersioningStrategy {
 
     @Override
     String getNextVersion(String currentVersion, VersionIncrementType type) {

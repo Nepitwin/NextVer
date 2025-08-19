@@ -20,13 +20,25 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.apache.groovy:groovy'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-tomcat
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    // https://mvnrepository.com/artifact/org.apache.groovy/groovy
+    implementation 'org.apache.groovy:groovy'
+
+    // Testing
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // https://mvnrepository.com/artifact/org.spockframework/spock-core
+    testImplementation("org.spockframework:spock-core:2.4-M6-groovy-4.0")
+    // https://mvnrepository.com/artifact/org.spockframework/spock-spring
+    testImplementation("org.spockframework:spock-spring:2.4-M6-groovy-4.0")
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     // ToDo Replace with database container
     runtimeOnly 'com.h2database:h2'
 }

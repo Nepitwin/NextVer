@@ -1,14 +1,11 @@
 package com.asekulsk.nextver.persistence
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import com.asekulsk.nextver.enumeration.VersionType
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.*
 
 @Entity
-@Table(name = "versions")
+@Table
 class Version {
 
     @Id
@@ -16,11 +13,17 @@ class Version {
     Long id
 
     @Column(nullable = false)
-    String project
+    String name
 
     @Column(nullable = false)
-    String versionString
+    @Enumerated(EnumType.STRING)
+    VersionType type
 
     @Column(nullable = false)
-    boolean released = true
+    String version
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    Project project
 }

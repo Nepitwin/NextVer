@@ -1,74 +1,68 @@
 package com.asekulsk.nextver.service
 
-import com.asekulsk.nextver.enumeration.VersionIncrementType
-import com.asekulsk.nextver.interfaces.VersioningStrategy
+import com.asekulsk.nextver.enumeration.VersionType
+import com.asekulsk.nextver.exceptions.DataNotFoundException
+import com.asekulsk.nextver.exceptions.InvalidDataException
+import com.asekulsk.nextver.interfaces.IVersionService
+import com.asekulsk.nextver.interfaces.IVersioningStrategy
 import com.asekulsk.nextver.persistence.Version
 import com.asekulsk.nextver.repository.ProjectRepository
 import com.asekulsk.nextver.repository.VersionRepository
 import com.asekulsk.nextver.versioning.FourPartStrategy
-import com.asekulsk.nextver.versioning.SemVerStrategy
+import com.asekulsk.nextver.versioning.SemanticVersionStrategy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class VersionService {
+class VersionService implements IVersionService {
 
     private final VersionRepository versionRepository
     private final ProjectRepository projectRepository
 
-    private final Map<String, VersioningStrategy> strategies = [
-            "SEMVER"    : new SemVerStrategy(),
-            "FOUR_PART" : new FourPartStrategy()
-    ] as Map<String, VersioningStrategy>
+    private final Map<VersionType, IVersioningStrategy> strategies = [
+            (VersionType.SEMVER)   : new SemanticVersionStrategy(),
+            (VersionType.FOUR_PART): new FourPartStrategy()
+    ] as Map<VersionType, IVersioningStrategy>
 
     VersionService(VersionRepository versionRepository, ProjectRepository projectRepository) {
         this.versionRepository = versionRepository
         this.projectRepository = projectRepository
     }
 
+    @Override
     @Transactional
-    Version getNextVersion(String projectName, VersionIncrementType type) {
+    boolean register(String projectName, String versionName, String version, VersionType type) {
+
         def project = projectRepository.findByName(projectName)
-                .orElseThrow { new IllegalArgumentException("Project not found: $projectName") }
+                .orElseThrow { new DataNotFoundException("Project not found from name '$projectName'") }
 
-        def strategy = strategies[project.versionFormat]
-        if (!strategy) throw new IllegalArgumentException("Unsupported version format: ${project.versionFormat}")
+        def strategy = strategies[type]
 
-        def current = versionRepository.findTopByProjectOrderByIdDesc(projectName)
-                .map { it.versionString }
-                .orElse(initialVersionFor(project.versionFormat))
-
-        def next = strategy.getNextVersion(current, type)
-
-        def saved = new Version(
-                project: projectName,
-                versionString: next,
-                released: true
-        )
-        versionRepository.save(saved)
-    }
-
-    @Transactional
-    Version registerVersion(String projectName, String versionString, boolean released = true) {
-        def project = projectRepository.findByName(projectName)
-                .orElseThrow { new IllegalArgumentException("Project not found: $projectName") }
-
-        def strategy = strategies[project.versionFormat]
-        if (!strategy) throw new IllegalArgumentException("Unsupported version format: ${project.versionFormat}")
-
-        if (!strategy.validate(versionString)) {
-            throw new IllegalArgumentException("Version $versionString does not match format ${project.versionFormat}")
+        if (!strategy) {
+            throw new DataNotFoundException("Unsupported version format: ${type}")
         }
 
-        def entity = new Version(project: projectName, versionString: versionString, released: released)
-        versionRepository.save(entity)
+        if (!strategy.validate(version)) {
+            throw new InvalidDataException("Version $version does not match format")
+        }
+
+        // TODO Verify if version name already exists in project
+
+        def entity = new Version()
+        entity.name = versionName
+        entity.version = version
+        entity.project = project
+        entity.type = type
+
+        versionRepository.save(entity) != null
     }
 
-    private static String initialVersionFor(String format) {
-        switch (format) {
-            case "SEMVER": return "1.0.0"
-            case "FOUR_PART": return "1.0.0.0"
-            default: return "0.1.0"
-        }
+    @Override
+    Version getNextVersion(String projectName, String versionName) {
+
+        // TODO Implement me
+
+
+        null
     }
 }

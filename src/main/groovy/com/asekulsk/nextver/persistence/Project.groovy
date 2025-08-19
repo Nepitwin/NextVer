@@ -1,14 +1,9 @@
 package com.asekulsk.nextver.persistence
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 
 @Entity
-@Table(name = "projects")
+@Table
 class Project {
 
     @Id
@@ -18,8 +13,6 @@ class Project {
     @Column(unique = true, nullable = false)
     String name
 
-    @Column(nullable = false)
-    String versionFormat = "SEMVER"  // SEMVER, FOUR_PART, CUSTOM_PATTERN
-
-    String customPattern
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    List<Version> versions = []
 }
