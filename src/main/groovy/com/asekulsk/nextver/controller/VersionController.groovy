@@ -1,10 +1,9 @@
 package com.asekulsk.nextver.controller
 
-import com.asekulsk.nextver.enumeration.VersionIncrementType
 import com.asekulsk.nextver.interfaces.IVersionService
-import com.asekulsk.nextver.persistence.Version
+import com.asekulsk.nextver.request.NextVersionRequest
 import com.asekulsk.nextver.request.RegisterVersionRequest
-import com.asekulsk.nextver.service.VersionService
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -21,9 +20,9 @@ class VersionController {
         this.versionService = versionService
     }
 
-    @PostMapping("/next/{project}")
-    Version next(@PathVariable("project") String project, @PathVariable("type") VersionIncrementType type) {
-        versionService.getNextVersion(project, type)
+    @GetMapping("/next/{project}")
+    String next(@PathVariable("project") String project, @RequestBody NextVersionRequest body) {
+        versionService.getNextVersion(project, body.versionName, body.versionIncrementType).version
     }
 
     @PostMapping("/register/{project}")

@@ -1,5 +1,6 @@
 package com.asekulsk.nextver.service
 
+import com.asekulsk.nextver.enumeration.VersionIncrementType
 import com.asekulsk.nextver.enumeration.VersionType
 import com.asekulsk.nextver.exceptions.DataNotFoundException
 import com.asekulsk.nextver.exceptions.InvalidDataException
@@ -58,11 +59,22 @@ class VersionService implements IVersionService {
     }
 
     @Override
-    Version getNextVersion(String projectName, String versionName) {
+    @Transactional
+    Version getNextVersion(String projectName, String versionName, VersionIncrementType incrementType) {
 
-        // TODO Implement me
+        def project = projectRepository.findByName(projectName)
+                .orElseThrow { new DataNotFoundException("Project not found from name '$projectName'") }
 
+        var version = project.versions.find { it -> it.name == versionName}
 
-        null
+        if (version == null)
+        {
+            throw new DataNotFoundException("Version not found by name '$versionName'")
+        }
+
+        def strategy = strategies[version.type]
+        version.version = strategy.getNextVersion(version.version, incrementType)
+
+        versionRepository.save(version)
     }
 }
