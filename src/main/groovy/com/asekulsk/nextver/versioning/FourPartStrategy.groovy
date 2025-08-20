@@ -8,6 +8,7 @@ class FourPartStrategy implements IVersioningStrategy {
     @Override
     String getNextVersion(String currentVersion, VersionIncrementType type) {
         def parts = currentVersion.split("\\.")
+
         if (parts.size() != 4) {
             throw new IllegalArgumentException("Invalid four-part version: $currentVersion")
         }

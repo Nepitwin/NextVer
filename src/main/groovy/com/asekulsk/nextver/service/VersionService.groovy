@@ -47,7 +47,12 @@ class VersionService implements IVersionService {
             throw new InvalidDataException("Version $version does not match format")
         }
 
-        // TODO Verify if version name already exists in project
+        var projectVersion = project.versions.find { it -> it.name == versionName}
+
+        if (projectVersion != null)
+        {
+            throw new DataNotFoundException("Version found by name '$versionName'")
+        }
 
         def entity = new Version()
         entity.name = versionName

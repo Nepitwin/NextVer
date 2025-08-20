@@ -26,7 +26,7 @@ class ProjectController {
 
     @PostMapping("/register/{name}")
     boolean register(@PathVariable("name") String name) {
-        if (name.isBlank() or name.isEmpty() or name.isAllWhitespace())
+        if (name == null || name.isBlank() || name.isEmpty() || name.isAllWhitespace())
         {
             throw new InvalidDataException("Empty name from project is not allowed")
         }
