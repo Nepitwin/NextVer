@@ -26,6 +26,18 @@ class VersionControllerSpec extends Specification {
         result
     }
 
+    def "should pass correct parameters to register"() {
+        given:
+        def project = "TestProject"
+        def request = new RegisterVersionRequest(versionName: "v2", version: "2.0.0", type: VersionType.FOUR_PART)
+
+        when:
+        versionController.register(project, request)
+
+        then:
+        1 * versionService.register(project, "v2", "2.0.0", VersionType.FOUR_PART)
+    }
+
     def "should call next and return next version string"() {
         given:
         def project = "TestProject"
@@ -39,18 +51,6 @@ class VersionControllerSpec extends Specification {
 
         then:
         result == "1.1.0"
-    }
-
-    def "should pass correct parameters to register"() {
-        given:
-        def project = "TestProject"
-        def request = new RegisterVersionRequest(versionName: "v2", version: "2.0.0", type: VersionType.FOUR_PART)
-
-        when:
-        versionController.register(project, request)
-
-        then:
-        1 * versionService.register(project, "v2", "2.0.0", VersionType.FOUR_PART)
     }
 
     def "should pass correct parameters to next"() {

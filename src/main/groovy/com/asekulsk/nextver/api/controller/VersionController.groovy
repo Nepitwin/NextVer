@@ -2,6 +2,8 @@ package com.asekulsk.nextver.api.controller
 
 import com.asekulsk.nextver.api.request.NextVersionRequest
 import com.asekulsk.nextver.api.request.RegisterVersionRequest
+import com.asekulsk.nextver.api.util.NextVerExceptionConverter
+import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.persistence.interfaces.IVersionService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,11 +24,25 @@ class VersionController {
 
     @GetMapping("/next/{project}")
     String next(@PathVariable("project") String project, @RequestBody NextVersionRequest body) {
-        versionService.getNextVersion(project, body.versionName, body.versionIncrementType).version
+        try
+        {
+            versionService.getNextVersion(project, body.versionName, body.versionIncrementType).version
+        }
+        catch (NextVerException ex)
+        {
+            throw NextVerExceptionConverter.CastToException(ex)
+        }
     }
 
     @PostMapping("/register/{project}")
     boolean register(@PathVariable("project") String project, @RequestBody RegisterVersionRequest body) {
-        versionService.register(project, body.versionName, body.version, body.type)
+        try
+        {
+            versionService.register(project, body.versionName, body.version, body.type)
+        }
+        catch (NextVerException ex)
+        {
+            throw NextVerExceptionConverter.CastToException(ex)
+        }
     }
 }

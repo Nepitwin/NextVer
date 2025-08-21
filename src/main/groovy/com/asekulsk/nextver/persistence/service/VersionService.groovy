@@ -1,9 +1,9 @@
 package com.asekulsk.nextver.persistence.service
 
-import com.asekulsk.nextver.api.exceptions.DataNotFoundException
-import com.asekulsk.nextver.api.exceptions.InvalidDataException
+import com.asekulsk.nextver.domain.enumeration.NextVerReason
 import com.asekulsk.nextver.domain.enumeration.VersionIncrementType
 import com.asekulsk.nextver.domain.enumeration.VersionType
+import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.domain.interfaces.IVersioningStrategy
 import com.asekulsk.nextver.domain.versioning.FourPartStrategy
 import com.asekulsk.nextver.domain.versioning.SemanticVersionStrategy
@@ -35,23 +35,23 @@ class VersionService implements IVersionService {
     boolean register(String projectName, String versionName, String version, VersionType type) {
 
         def project = projectRepository.findByName(projectName)
-                .orElseThrow { new DataNotFoundException("Project not found from name '$projectName'") }
+                .orElseThrow { new NextVerException("Project not found from name '$projectName'", NextVerReason.DataNotFound) }
 
         def strategy = strategies[type]
 
         if (!strategy) {
-            throw new DataNotFoundException("Unsupported version format: ${type}")
+            throw new NextVerException("Unsupported version format: ${type}", NextVerReason.InvalidData)
         }
 
         if (!strategy.validate(version)) {
-            throw new InvalidDataException("Version $version does not match format")
+            throw new NextVerException("Version $version does not match format", NextVerReason.InvalidData)
         }
 
         var projectVersion = project.versions.find { it -> it.name == versionName}
 
         if (projectVersion != null)
         {
-            throw new DataNotFoundException("Version found by name '$versionName'")
+            throw new NextVerException("Version found by name '$versionName'", NextVerReason.DataAlreadyExists)
         }
 
         def entity = new Version()
@@ -68,13 +68,13 @@ class VersionService implements IVersionService {
     Version getNextVersion(String projectName, String versionName, VersionIncrementType incrementType) {
 
         def project = projectRepository.findByName(projectName)
-                .orElseThrow { new DataNotFoundException("Project not found from name '$projectName'") }
+                .orElseThrow { new NextVerException("Project not found from name '$projectName'", NextVerReason.DataNotFound) }
 
         var version = project.versions.find { it -> it.name == versionName}
 
         if (version == null)
         {
-            throw new DataNotFoundException("Version not found by name '$versionName'")
+            throw new NextVerException("Version not found by name '$versionName'", NextVerReason.DataNotFound)
         }
 
         def strategy = strategies[version.type]

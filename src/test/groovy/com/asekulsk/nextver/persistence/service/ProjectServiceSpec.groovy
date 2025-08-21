@@ -1,9 +1,10 @@
 package com.asekulsk.nextver.persistence.service
 
-import com.asekulsk.nextver.api.exceptions.DataNotFoundException
-import com.asekulsk.nextver.api.exceptions.ProjectAlreadyExistsException
+import com.asekulsk.nextver.domain.enumeration.NextVerReason
+import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.persistence.model.Project
 import com.asekulsk.nextver.persistence.repository.ProjectRepository
+import com.asekulsk.nextver.util.PersistenceGenerator
 import spock.lang.Specification
 
 class ProjectServiceSpec extends Specification {
@@ -13,54 +14,59 @@ class ProjectServiceSpec extends Specification {
 
     def "should register a new project successfully"() {
         given:
-        def projectName = "NewProject"
-        projectRepository.findByName(projectName) >> Optional.empty()
+        Project project = PersistenceGenerator.GenerateProject()
+
+        projectRepository.findByName(project.name) >> Optional.empty()
 
         when:
-        def result = projectService.register(projectName)
+        def result = projectService.register(project.name)
 
         then:
         1 * projectRepository.save(_) >> { Project p ->
-            assert p.name == projectName
+            assert p.name == project.name
             p
         }
         result
     }
 
-    def "should throw ProjectAlreadyExistsException if project already exists"() {
+    def "should throw NextVerException if project already exists"() {
         given:
-        def projectName = "ExistingProject"
-        projectRepository.findByName(projectName) >> Optional.of(new Project(name: projectName))
+        Project project = PersistenceGenerator.GenerateProject()
+
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        projectService.register(projectName)
+        projectService.register(project.name)
 
         then:
-        thrown(ProjectAlreadyExistsException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataAlreadyExists
     }
 
     def "should return project when found by name"() {
         given:
-        def projectName = "ExistingProject"
-        def project = new Project(name: projectName)
-        projectRepository.findByName(projectName) >> Optional.of(project)
+        Project project = PersistenceGenerator.GenerateProject()
+
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        def result = projectService.getProjectByName(projectName)
+        def result = projectService.getProjectByName(project.name)
 
         then:
         result == project
     }
 
-    def "should throw DataNotFoundException if project not found by name"() {
+    def "should throw NextVerReason if project not found by name"() {
         given:
-        def projectName = "UnknownProject"
-        projectRepository.findByName(projectName) >> Optional.empty()
+        Project project = PersistenceGenerator.GenerateProject()
+
+        projectRepository.findByName(project.name) >> Optional.empty()
 
         when:
-        projectService.getProjectByName(projectName)
+        projectService.getProjectByName(project.name)
 
         then:
-        thrown(DataNotFoundException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataNotFound
     }
 }

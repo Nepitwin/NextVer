@@ -1,12 +1,14 @@
 package com.asekulsk.nextver.persistence.service
 
-import com.asekulsk.nextver.api.exceptions.DataNotFoundException
-import com.asekulsk.nextver.api.exceptions.InvalidDataException
+import com.asekulsk.nextver.domain.enumeration.NextVerReason
 import com.asekulsk.nextver.domain.enumeration.VersionIncrementType
-import com.asekulsk.nextver.domain.enumeration.VersionType
+import com.asekulsk.nextver.domain.exceptions.NextVerException
+import com.asekulsk.nextver.persistence.model.Project
 import com.asekulsk.nextver.persistence.model.Version
 import com.asekulsk.nextver.persistence.repository.ProjectRepository
 import com.asekulsk.nextver.persistence.repository.VersionRepository
+import com.asekulsk.nextver.util.PersistenceGenerator
+import com.asekulsk.nextver.util.VersioningGenerator
 import spock.lang.Specification
 
 class VersionServiceSpec extends Specification {
@@ -17,92 +19,132 @@ class VersionServiceSpec extends Specification {
 
     def "should register a valid version successfully"() {
         given:
-        def project = [name: "TestProject"]
-        def versionName = "v1"
-        def versionValue = "1.0.0"
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
 
-        projectRepository.findByName("TestProject") >> Optional.of(project)
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        def result = versionService.register("TestProject", versionName, versionValue, VersionType.SEMVER)
+        def result = versionService.register(project.name, version.name, version.version, version.type)
 
         then:
         1 * versionRepository.save(_) >> new Version()
         result
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
-    def "should throw DataNotFoundException if project not found"() {
+    def "should throw NextVerReason if project not found"() {
         given:
-        projectRepository.findByName("UnknownProject") >> Optional.empty()
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        projectRepository.findByName(project.name) >> Optional.empty()
 
         when:
-        versionService.register("UnknownProject", "v1", "1.0.0", VersionType.SEMVER)
+        versionService.register(project.name, version.name, version.version, version.type)
 
         then:
-        thrown(DataNotFoundException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataNotFound
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
-    def "should throw InvalidDataException if version format is invalid"() {
+    def "should throw NextVerReason if version format is invalid"() {
         given:
-        def project = [name: "TestProject"]
-        projectRepository.findByName("TestProject") >> Optional.of(project)
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        versionService.register("TestProject", "v1", "invalid-version", VersionType.SEMVER)
+        versionService.register(project.name, version.name, "invalid-version", version.type)
 
         then:
-        thrown(InvalidDataException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.InvalidData
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
-    def "should throw DataNotFoundException if version name already exists"() {
+    def "should throw NextVerReason if version name already exists"() {
         given:
-        def existingVersion = [name: "v1", version: "1.0.0"]
-        def project = [name: "TestProject", versions: [existingVersion]]
-        projectRepository.findByName("TestProject") >> Optional.of(project)
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        project.versions = [version]
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        versionService.register("TestProject", "v1", "1.0.1", VersionType.SEMVER)
+        versionService.register(project.name, version.name, version.version, version.type)
 
         then:
-        thrown(DataNotFoundException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataAlreadyExists
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
     def "should get next version successfully"() {
         given:
-        def version = new Version(name: "v1", version: "1.0.0", type: VersionType.SEMVER)
-        def project = [name: "TestProject", versions: [version]]
-        projectRepository.findByName("TestProject") >> Optional.of(project)
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        project.versions = [version]
+        projectRepository.findByName(project.name) >> Optional.of(project)
+        def old_version = version.version
 
         when:
-        versionService.getNextVersion("TestProject", "v1", VersionIncrementType.MINOR)
+        versionService.getNextVersion(project.name, version.name, VersionIncrementType.MINOR)
 
         then:
         1 * versionRepository.save(_) >> { Version v ->
-            assert v.version != "1.0.0"  // version should be incremented
+            assert v.version != old_version
             v
         }
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
-    def "should throw DataNotFoundException if version not found when getting next version"() {
+    def "should throw NextVerReason if version not found when getting next version"() {
         given:
-        def project = [name: "TestProject"]
-        projectRepository.findByName("TestProject") >> Optional.of(project)
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        projectRepository.findByName(project.name) >> Optional.of(project)
 
         when:
-        versionService.getNextVersion("TestProject", "v1", VersionIncrementType.MINOR)
+        versionService.getNextVersion(project.name, version.name, VersionIncrementType.MINOR)
 
         then:
-        thrown(DataNotFoundException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataNotFound
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
-    def "should throw DataNotFoundException if project not found when getting next version"() {
+    def "should throw NextVerReason if project not found when getting next version"() {
         given:
-        projectRepository.findByName("UnknownProject") >> Optional.empty()
+        Project project = PersistenceGenerator.GenerateProject()
+        Version version = versionFactory(project)
+
+        projectRepository.findByName(project.name) >> Optional.empty()
 
         when:
-        versionService.getNextVersion("UnknownProject", "v1", VersionIncrementType.MINOR)
+        versionService.getNextVersion(project.name, version.name, VersionIncrementType.MINOR)
 
         then:
-        thrown(DataNotFoundException)
+        def ex = thrown(NextVerException)
+        ex.reason == NextVerReason.DataNotFound
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 }
