@@ -1,7 +1,9 @@
 package com.asekulsk.nextver.api.controller
 
 import com.asekulsk.nextver.api.exceptions.InvalidDataException
+import com.asekulsk.nextver.api.request.NextVersionRequest
 import com.asekulsk.nextver.api.request.RegisterRequest
+import com.asekulsk.nextver.api.request.RegisterVersionRequest
 import com.asekulsk.nextver.api.util.NextVerExceptionConverter
 import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.persistence.interfaces.IProjectService
@@ -54,6 +56,30 @@ class ProjectController {
         try
         {
             projectService.register(name, key)
+        }
+        catch (NextVerException ex)
+        {
+            throw NextVerExceptionConverter.CastToException(ex)
+        }
+    }
+
+    @PostMapping("/register/version/{project}")
+    boolean register(@PathVariable("project") String project, @RequestBody RegisterVersionRequest body) {
+        try
+        {
+            projectService.register(project, body.versionName, body.version, body.type)
+        }
+        catch (NextVerException ex)
+        {
+            throw NextVerExceptionConverter.CastToException(ex)
+        }
+    }
+
+    @GetMapping("/next/version/{project}")
+    String next(@PathVariable("project") String project, @RequestBody NextVersionRequest body) {
+        try
+        {
+            projectService.getNextVersion(project, body.versionName, body.versionIncrementType).version
         }
         catch (NextVerException ex)
         {
