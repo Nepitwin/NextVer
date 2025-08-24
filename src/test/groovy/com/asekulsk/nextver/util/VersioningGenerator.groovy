@@ -6,25 +6,21 @@ import com.asekulsk.nextver.persistence.model.Version
 
 class VersioningGenerator {
     static def versionFactories = [
-            { p -> createSemverVersion(p) },
-            { p -> createFourPartVersion(p) }
+            { createSemverVersion() },
+            { createFourPartVersion() }
     ]
 
-    static Version createSemverVersion(Project project) {
+    static Version createSemverVersion() {
         PersistenceGenerator.GenerateVersion(
-                PersistenceGenerator.GenerateRandomString(20),
-                project,
-                "1.0.0",
-                VersionType.SEMVER
+                version: "1.0.0",
+                type: VersionType.SEMVER
         )
     }
 
-    static Version createFourPartVersion(Project project) {
+    static Version createFourPartVersion() {
         PersistenceGenerator.GenerateVersion(
-                PersistenceGenerator.GenerateRandomString(20),
-                project,
-                "1.0.0.0",
-                VersionType.FOUR_PART
+                version: "1.0.0.0",
+                type: VersionType.FOUR_PART
         )
     }
 }

@@ -1,0 +1,8 @@
+package com.asekulsk.nextver.util
+
+class CryptoData {
+    public static def ValidRsaKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB4mrumBLjOKyUvqvMrUJlk8CzITkqLejbkeUtMiLKeOv2389Vt5L6rKlehMcC8yfeKVUMccnNFp40+bKhx1Uljerv24uRgSMijkc8T63B1nki/Trg3nW3L7qqjuSCmeozR9cEuxFEpMje8Ez+GcTPtJc842Mtb4/8eVnsnm1Rs1kBpAFNU+V/Owv8XbGl1cdD+ZF0tHd2JIIXowlqRMXB+3gw85OzGmT3TKgrEcyxaukEYNsw6oKLoNxPN3vv+fSgdKM/0Z59KSVFb9Xx19mMkYA0z7OIgLC++tcr8ObxscAo1hnF7pKT51QKdmJ+v43WRw17pgN0VLDA3DGgD75v"
+    public static def ValidSecondRsaKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDqdIOFNWPPrKDUd4njcZa+UyJZ85rI1Kj1dlspQZvMwBMecM23auBAw3cuVEuCsWSGdujUEzGYizBFCIaI/eVlEqLAcZj5oysMJPfnC1l39izKmgQEBA1CjE1FMFgw/qFcbzKY9csYXFFJCWcXbDZ7AClK7hrnPhbuzsX5A4j/Sau/pmau9b43uQ9M296QCxSS0q/6//qTM7tBDmFID4Y7ZCIPuSVinq/3oBPXC0T76HaS7RGpTj9r2EXBwnrcZsQi13GOI/dkbrgbI9gb90FIVLcvqUbDPx7n63X3KAD01zH7TJiYyK6bDQt4Hw7a9dJ71LvDk5Scs1f+gic+Y6nF"
+
+    public static List<String> ValidKeys = [ValidRsaKey, ValidSecondRsaKey]
+}

@@ -2,6 +2,7 @@ package com.asekulsk.nextver.persistence.model
 
 import com.asekulsk.nextver.domain.enumeration.VersionType
 import com.fasterxml.jackson.annotation.JsonIgnore
+import groovy.transform.Canonical
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -16,6 +17,7 @@ import jakarta.persistence.Table
 
 @Entity
 @Table
+@Canonical
 class Version {
 
     @Id
@@ -31,9 +33,4 @@ class Version {
 
     @Column(nullable = false)
     String version
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    Project project
 }

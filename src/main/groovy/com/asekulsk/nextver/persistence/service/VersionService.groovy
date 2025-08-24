@@ -54,13 +54,7 @@ class VersionService implements IVersionService {
             throw new NextVerException("Version found by name '$versionName'", NextVerReason.DataAlreadyExists)
         }
 
-        def entity = new Version()
-        entity.name = versionName
-        entity.version = version
-        entity.project = project
-        entity.type = type
-
-        versionRepository.save(entity) != null
+        projectRepository.save(project.addVersion(new Version(name: versionName, version: version, type: type))) != null
     }
 
     @Override

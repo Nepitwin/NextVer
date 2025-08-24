@@ -19,14 +19,18 @@ class ProjectService implements IProjectService {
 
     @Override
     @Transactional
-    boolean register(String name) {
+    boolean register(String name, String key) {
         projectRepository.findByName(name)
                 .ifPresent {throw new NextVerException("Project already exists by name '$name'", NextVerReason.DataAlreadyExists) }
-
-        Project project = new Project()
-        project.name = name
-
-        projectRepository.save(project) != null
+        try
+        {
+            Project project = new Project(name: name, key: key)
+            projectRepository.save(project) != null
+        }
+        catch (IllegalArgumentException ex)
+        {
+            throw new NextVerException("Failed to register project '$name'", NextVerReason.InvalidData, ex)
+        }
     }
 
     @Override

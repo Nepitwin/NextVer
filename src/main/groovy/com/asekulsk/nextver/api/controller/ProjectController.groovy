@@ -1,6 +1,7 @@
 package com.asekulsk.nextver.api.controller
 
 import com.asekulsk.nextver.api.exceptions.InvalidDataException
+import com.asekulsk.nextver.api.request.RegisterRequest
 import com.asekulsk.nextver.api.util.NextVerExceptionConverter
 import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.persistence.interfaces.IProjectService
@@ -8,6 +9,7 @@ import com.asekulsk.nextver.persistence.model.Project
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -33,17 +35,25 @@ class ProjectController {
         }
     }
 
-    @PostMapping("/register/{name}")
-    boolean register(@PathVariable("name") String name) {
+    @PostMapping("/register")
+    boolean register(@RequestBody RegisterRequest body) {
+
+        def name = body.name
+        def key = body.key
 
         if (name == null || name.isBlank() || name.isEmpty() || name.isAllWhitespace())
         {
-            throw new InvalidDataException("Empty name from project is not allowed")
+            throw new InvalidDataException("Empty 'name' data field is not allowed")
+        }
+
+        if (key == null || key.isBlank() || key.isEmpty() || key.isAllWhitespace())
+        {
+            throw new InvalidDataException("Empty 'key' data field is not allowed")
         }
 
         try
         {
-            projectService.register(name)
+            projectService.register(name, key)
         }
         catch (NextVerException ex)
         {
