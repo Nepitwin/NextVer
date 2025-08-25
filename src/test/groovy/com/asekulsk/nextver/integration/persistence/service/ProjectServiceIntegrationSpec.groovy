@@ -5,10 +5,12 @@ import com.asekulsk.nextver.domain.enumeration.VersionIncrementType
 import com.asekulsk.nextver.domain.enumeration.VersionType
 import com.asekulsk.nextver.domain.exceptions.NextVerException
 import com.asekulsk.nextver.persistence.model.Project
+import com.asekulsk.nextver.persistence.model.Version
 import com.asekulsk.nextver.persistence.repository.ProjectRepository
 import com.asekulsk.nextver.persistence.service.ProjectService
 import com.asekulsk.nextver.util.CryptoData
 import com.asekulsk.nextver.util.PersistenceGenerator
+import com.asekulsk.nextver.util.VersioningGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
@@ -82,22 +84,21 @@ class ProjectServiceIntegrationSpec extends Specification {
         def project = PersistenceGenerator.GenerateProject()
         projectRepository.saveAndFlush(project)
 
-        def versionName = "main"
-        def versionValue = (type == VersionType.SEMVER) ? "1.2.3" : "1.2.3.4"
+        Version version = versionFactory()
 
         when:
-        def ok = projectService.register(project.name, versionName, versionValue, type)
+        def ok = projectService.register(project.name, version.name, version.version, version.type)
 
         then:
         ok
         def stored = projectRepository.findAll().first()
         stored.versions.size() == 1
-        stored.versions[0].name == versionName
-        stored.versions[0].version == versionValue
-        stored.versions[0].type == type
+        stored.versions[0].name == version.name
+        stored.versions[0].version == version.version
+        stored.versions[0].type == version.type
 
         where:
-        type << [VersionType.SEMVER, VersionType.FOUR_PART]
+        versionFactory << VersioningGenerator.versionFactories
     }
 
     @Transactional
@@ -106,14 +107,19 @@ class ProjectServiceIntegrationSpec extends Specification {
         def project = PersistenceGenerator.GenerateProject()
         projectRepository.saveAndFlush(project)
 
-        projectService.register(project.name, "api", "0.1.0", VersionType.SEMVER)
+        Version version = versionFactory()
+
+        projectService.register(project.name, version.name, version.version, version.type)
 
         when:
-        projectService.register(project.name, "api", "0.2.0", VersionType.SEMVER)
+        projectService.register(project.name, version.name, version.version, version.type)
 
         then:
         def ex = thrown(NextVerException)
         ex.reason == NextVerReason.DataAlreadyExists
+
+        where:
+        versionFactory << VersioningGenerator.versionFactories
     }
 
     def "register throws DataNotFound for unknown project"() {
@@ -164,6 +170,7 @@ class ProjectServiceIntegrationSpec extends Specification {
         VersionType.FOUR_PART        | VersionIncrementType.PATCH
         VersionType.FOUR_PART        | VersionIncrementType.MINOR
         VersionType.FOUR_PART        | VersionIncrementType.MAJOR
+        VersionType.FOUR_PART        | VersionIncrementType.BUILD
     }
 
     def "getNextVersion throws DataNotFound if the project is unknown"() {

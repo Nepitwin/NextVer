@@ -16,7 +16,7 @@ class SemanticVersionStrategySpec extends Specification {
 
         where:
         current   | type                         || expected
-        "1.2.3"   | VersionIncrementType.MAJOR || "2.0.0"
+        "1.2.3"   | VersionIncrementType.MAJOR   || "2.0.0"
         "1.2.3"   | VersionIncrementType.MINOR   || "1.3.0"
         "1.2.3"   | VersionIncrementType.PATCH   || "1.2.4"
         "0.9.9"   | VersionIncrementType.MAJOR   || "1.0.0"

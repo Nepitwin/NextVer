@@ -43,16 +43,14 @@ class ProjectSpec extends Specification {
     }
 
     def "should compare projects using @Canonical generated equals"() {
-        given:
-        def project1 = new Project(name: "NextVer", key: CryptoData.ValidRsaKey)
-        def project2 = new Project(name: "NextVer", key: CryptoData.ValidRsaKey)
-        def project3 = new Project(name: "Other", key: CryptoData.ValidRsaKey)
-        def project4 = new Project(name: "NextVer", key: CryptoData.ValidSecondRsaKey)
-
         expect:
-        project1 == project2
-        project1 != project3
-        project1 != project4
+        (project1 == project2) == expected
+
+        where:
+        project1                                                  | project2                                                        || expected
+        new Project(name: "NextVer", key: CryptoData.ValidRsaKey) | new Project(name: "NextVer", key: CryptoData.ValidRsaKey)       || true
+        new Project(name: "NextVer", key: CryptoData.ValidRsaKey) | new Project(name: "Other", key: CryptoData.ValidRsaKey)         || false
+        new Project(name: "NextVer", key: CryptoData.ValidRsaKey) | new Project(name: "NextVer", key: CryptoData.ValidSecondRsaKey) || false
     }
 
     def "addVersion should set back-reference and avoid duplicates"() {

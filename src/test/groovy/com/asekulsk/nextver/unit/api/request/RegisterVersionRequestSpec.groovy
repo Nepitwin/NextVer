@@ -26,7 +26,7 @@ class RegisterVersionRequestSpec extends Specification {
         def request = new RegisterVersionRequest(
                 version: "2.0.0",
                 versionName: "Next Release",
-                type: type
+                type: type as VersionType
         )
 
         then:

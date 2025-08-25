@@ -1,9 +1,9 @@
-package com.asekulsk.nextver.domain.crypto
+package com.asekulsk.nextver.security.crypto
 
 import org.bouncycastle.crypto.util.OpenSSHPublicKeyUtil
 
 class KeyCrypto {
-    private static def validAlgorithms = ['ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
+    private static def validAlgorithms = ['ssh-rsa', 'ssh-dss', 'ssh-ed25519', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
 
     static boolean IsValidSshKey(String key) {
         if (!key) {

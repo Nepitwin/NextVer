@@ -1,7 +1,6 @@
 package com.asekulsk.nextver.unit.persistence.model
 
 import com.asekulsk.nextver.domain.enumeration.VersionType
-import com.asekulsk.nextver.persistence.model.Project
 import com.asekulsk.nextver.persistence.model.Version
 import spock.lang.Specification
 
@@ -9,7 +8,6 @@ class VersionSpec extends Specification {
 
     def "should allow setting and getting fields"() {
         given:
-        def project = new Project(id: 1L, name: "NextVer")
         def version = new Version()
 
         when:
@@ -28,6 +26,7 @@ class VersionSpec extends Specification {
     def "tuple constructor from @Canonical should assign all fields in order"() {
         when:
         def version = new Version(5L, "Initial Release", VersionType.SEMVER, "1.0.0")
+
         then:
         version.id == 5L
         version.name == "Initial Release"
@@ -38,6 +37,7 @@ class VersionSpec extends Specification {
     def "map constructor should set provided fields"() {
         when:
         def version = new Version(name: "Hotfix", type: VersionType.SEMVER, version: "1.0.1")
+
         then:
         version.id == null
         version.name == "Hotfix"

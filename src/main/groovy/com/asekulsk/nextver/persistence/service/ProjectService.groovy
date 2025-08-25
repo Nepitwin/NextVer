@@ -38,13 +38,14 @@ class ProjectService implements IProjectService {
             Project project = new Project(name: name, key: key)
             projectRepository.save(project) != null
         }
-        catch (IllegalArgumentException ex)
+        catch (IllegalArgumentException ignored)
         {
-            throw new NextVerException("Failed to register project '$name'", NextVerReason.InvalidData, ex)
+            throw new NextVerException("Failed to register project '$name'", NextVerReason.InvalidData)
         }
     }
 
     @Override
+    @Transactional
     boolean register(String projectName, String versionName, String version, VersionType type) {
         def project = projectRepository.findByName(projectName)
                 .orElseThrow { new NextVerException("Project not found from name '$projectName'", NextVerReason.DataNotFound) }
@@ -70,11 +71,13 @@ class ProjectService implements IProjectService {
     }
 
     @Override
+    @Transactional
     Project getProjectByName(String name) {
         return projectRepository.findByName(name).orElseThrow{throw new NextVerException("Project not found by name '$name'", NextVerReason.DataNotFound)}
     }
 
     @Override
+    @Transactional
     Version getNextVersion(String projectName, String versionName, VersionIncrementType type) {
         def project = projectRepository.findByName(projectName)
                 .orElseThrow { new NextVerException("Project not found from name '$projectName'", NextVerReason.DataNotFound) }
@@ -91,8 +94,7 @@ class ProjectService implements IProjectService {
 
         if (projectRepository.save(project) == null)
         {
-            // TODO Implement me
-            throw new NextVerException("Version not persist to project '$versionName'", NextVerReason.DataNotFound)
+            throw new NextVerException("Version not updated '$versionName'", NextVerReason.PersistFailed)
         }
 
         version

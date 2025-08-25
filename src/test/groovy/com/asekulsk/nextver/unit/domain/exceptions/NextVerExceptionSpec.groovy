@@ -32,7 +32,8 @@ class NextVerExceptionSpec extends Specification {
         reason << [
                 NextVerReason.DataAlreadyExists,
                 NextVerReason.DataNotFound,
-                NextVerReason.InvalidData
+                NextVerReason.InvalidData,
+                NextVerReason.PersistFailed
         ]
     }
 }

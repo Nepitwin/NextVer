@@ -1,6 +1,7 @@
 package com.asekulsk.nextver.integration.persistence.model
 
 import com.asekulsk.nextver.persistence.model.Project
+import com.asekulsk.nextver.persistence.model.Version
 import com.asekulsk.nextver.util.CryptoData
 import com.asekulsk.nextver.util.PersistenceGenerator
 import jakarta.persistence.EntityManager
@@ -53,7 +54,7 @@ class ProjectIntegrationSpec extends Specification {
     def "should cascade persist versions"() {
         given:
         def project = PersistenceGenerator.GenerateProject()
-        def version = PersistenceGenerator.GenerateVersion(project: project)
+        def version = PersistenceGenerator.GenerateVersion()
         project.addVersion(version)
 
         when:
@@ -70,7 +71,7 @@ class ProjectIntegrationSpec extends Specification {
     def "should remove orphan versions"() {
         given:
         def project = PersistenceGenerator.GenerateProject()
-        def version = PersistenceGenerator.GenerateVersion(project: project)
+        def version = PersistenceGenerator.GenerateVersion()
 
         project.addVersion(version)
         entityManager.persist(project)
@@ -84,5 +85,8 @@ class ProjectIntegrationSpec extends Specification {
         then: "version should be deleted from DB"
         def persistedProject = entityManager.find(Project, project.id)
         persistedProject.versions.isEmpty()
+
+        def entity = entityManager.find(Version, version.id)
+        entity.is(null)
     }
 }

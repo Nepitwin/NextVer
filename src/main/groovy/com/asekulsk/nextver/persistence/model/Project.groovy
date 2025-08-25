@@ -1,6 +1,6 @@
 package com.asekulsk.nextver.persistence.model
 
-import com.asekulsk.nextver.domain.crypto.KeyCrypto
+import com.asekulsk.nextver.security.crypto.KeyCrypto
 import groovy.transform.Canonical
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
